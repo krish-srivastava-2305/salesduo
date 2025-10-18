@@ -10,6 +10,20 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function extractErrorMessage(err: unknown): string {
+    if (axios.isAxiosError(err)) {
+      const data = err.response?.data as unknown;
+      if (typeof data === "string") return data;
+      if (data && typeof data === "object" && "message" in (data as Record<string, unknown>)) {
+        const maybe = (data as Record<string, unknown>).message;
+        if (typeof maybe === "string") return maybe;
+      }
+      return err.message || "Something went wrong.";
+    }
+    if (err instanceof Error) return err.message;
+    return "Something went wrong.";
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -30,13 +44,8 @@ export default function Home() {
         } catch { }
       }
       router.push("/optimized-listing");
-    } catch (err: any) {
-      // Prefer server-provided error message when available
-      const message =
-        (err?.response?.data &&
-          (typeof err.response.data === "string"
-            ? err.response.data
-            : err.response.data?.message)) || err?.message || "Something went wrong.";
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err);
       setError(String(message));
     } finally {
       setLoading(false);

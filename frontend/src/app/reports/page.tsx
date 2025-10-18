@@ -30,6 +30,20 @@ export default function ReportsPage() {
     const [error, setError] = useState<string | null>(null);
     const [query, setQuery] = useState("");
 
+    function extractErrorMessage(err: unknown): string {
+        if (axios.isAxiosError(err)) {
+            const data = err.response?.data as unknown;
+            if (typeof data === "string") return data;
+            if (data && typeof data === "object" && "message" in (data as Record<string, unknown>)) {
+                const maybe = (data as Record<string, unknown>).message;
+                if (typeof maybe === "string") return maybe;
+            }
+            return err.message || "Failed to load reports.";
+        }
+        if (err instanceof Error) return err.message;
+        return "Failed to load reports.";
+    }
+
     useEffect(() => {
         let ignore = false;
         async function load() {
@@ -39,12 +53,8 @@ export default function ReportsPage() {
                 console.log("Fetching reports from:", process.env.NEXT_PUBLIC_API_URL);
                 const res = await axios.get<ReportsResponse>(`${process.env.NEXT_PUBLIC_API_URL}/reports`);
                 if (!ignore) setReports(res.data?.reports || []);
-            } catch (err: any) {
-                const msg =
-                    (err?.response?.data &&
-                        (typeof err.response.data === "string"
-                            ? err.response.data
-                            : err.response.data?.message)) || err?.message || "Failed to load reports.";
+            } catch (err: unknown) {
+                const msg = extractErrorMessage(err);
                 if (!ignore) setError(String(msg));
             } finally {
                 if (!ignore) setLoading(false);

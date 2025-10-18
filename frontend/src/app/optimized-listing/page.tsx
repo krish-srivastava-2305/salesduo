@@ -97,6 +97,20 @@ export default function OptimizedListingPage() {
         setKeywords((prev) => prev.filter((_, idx) => idx !== i));
     }
 
+    function extractErrorMessage(err: unknown): string {
+        if (axios.isAxiosError(err)) {
+            const data = err.response?.data as unknown;
+            if (typeof data === "string") return data;
+            if (data && typeof data === "object" && "message" in (data as Record<string, unknown>)) {
+                const maybe = (data as Record<string, unknown>).message;
+                if (typeof maybe === "string") return maybe;
+            }
+            return err.message || "Failed to update listing.";
+        }
+        if (err instanceof Error) return err.message;
+        return "Failed to update listing.";
+    }
+
     async function handleSave() {
         setSaveError(null);
         setSaveSuccess(null);
@@ -118,12 +132,8 @@ export default function OptimizedListingPage() {
             console.log("Updating listing with data:", process.env.NEXT_PUBLIC_API_URL);
             await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/update-listing`, updated);
             setSaveSuccess("Listing updated successfully.");
-        } catch (err: any) {
-            const message =
-                (err?.response?.data &&
-                    (typeof err.response.data === "string"
-                        ? err.response.data
-                        : err.response.data?.message)) || err?.message || "Failed to update listing.";
+        } catch (err: unknown) {
+            const message = extractErrorMessage(err);
             setSaveError(String(message));
         } finally {
             setSaving(false);
