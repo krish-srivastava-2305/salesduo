@@ -36,7 +36,8 @@ export default function ReportsPage() {
             setError(null);
             setLoading(true);
             try {
-                const res = await axios.get<ReportsResponse>("http://localhost:4000/api/reports");
+                console.log("Fetching reports from:", process.env.NEXT_PUBLIC_API_URL);
+                const res = await axios.get<ReportsResponse>(`${process.env.NEXT_PUBLIC_API_URL}/reports`);
                 if (!ignore) setReports(res.data?.reports || []);
             } catch (err: any) {
                 const msg =

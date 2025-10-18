@@ -115,8 +115,8 @@ export default function OptimizedListingPage() {
                 },
                 asin: asin.trim()
             };
-
-            await axios.patch("http://localhost:4000/api/update-listing", updated);
+            console.log("Updating listing with data:", process.env.NEXT_PUBLIC_API_URL);
+            await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/update-listing`, updated);
             setSaveSuccess("Listing updated successfully.");
         } catch (err: any) {
             const message =

@@ -20,7 +20,7 @@ export default function Home() {
     }
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:4000/api/scrape-analyzer", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/scrape-analyzer`, {
         asin: trimmed,
       });
       // Persist data for the next page to consume

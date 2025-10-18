@@ -43,22 +43,41 @@ const model = genAI.getGenerativeModel({
 async function optimizeListing(currentListing) {
     
     const prompt = `
-        You are an expert Amazon e-commerce copywriter. Your goal is to rewrite and optimize a product listing for maximum conversion and SEO.
-        
-        Analyze the following product information:
-        
+        You are a senior Amazon SEO copywriting expert with deep knowledge of keyword optimization, consumer psychology, and Amazon A10 ranking algorithm. Your task is to rewrite and optimize this product listing to maximize CTR (click-through rate) and CVR (conversion rate), while maintaining Amazon content compliance.
+
+        Analyze the product below:
+
         Current Title:
         ${currentListing.title}
-        
+
         Current Bullet Points:
         ${currentListing.bullet_points.map(b => `- ${b}`).join('\n')}
-        
+
         Current Description:
         ${currentListing.description}
-        
-        Now, please generate a new, optimized version based on this information. 
-        Follow all instructions in the provided JSON schema.
-    `;
+
+        Guidelines:
+        - Maintain the product is factual accuracy, tone, and target audience.
+        - Avoid keyword stuffing — ensure natural language and clarity.
+        - Follow Amazon style and compliance rules.
+        - Title: max 200 characters, include 1 to 2 high-traffic keywords.
+        - Bullet Points: exactly 5 concise, benefit-oriented statements (≤ 250 chars each).
+        - Description: 1000 to 2000 characters with <p> and <b> tags for structure.
+        - Keywords: 3 to 5 long-tail or LSI keyword suggestions relevant to SEO.
+
+        Output Format:
+        Return only valid JSON conforming to this schema:
+        {
+        "improved_title": string,
+        "rewritten_bullet_points": [string, string, string, string, string],
+        "enhanced_description": string,
+        "keyword_suggestions": [string, string, string]
+        }
+
+        Do not include explanations, comments, or markdown formatting.
+        If unsure, gracefully return the closest valid completion.
+        `;
+
 
     console.log("Sending prompt to Gemini...");
 
